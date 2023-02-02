@@ -38,8 +38,6 @@ class DatabaseManager:
                      '''
 
         self._execute(statement, column_values)
-        print(self._execute(f"""SELECT COUNT(*) FROM '{table_name}'""").fetchall())
-
 
     def delete(self, table_name: str, values: Dict[str, Any]):
         delete_criteria = ' AND '.join([f'{column} = ?'
@@ -52,9 +50,8 @@ class DatabaseManager:
         self._execute(statement, column_values)
         self._execute(f""" UPDATE '{table_name}' SET 'id' = rowid""")
 
-
     def select(self, table_name: str, values: Dict[str, Any] = {},
-               sort_column: Optional[str] = None):
+               order_by: Optional[str] = None):
         statement = f"""SELECT * FROM {table_name};"""
         column_values = []
         if values:
@@ -63,10 +60,11 @@ class DatabaseManager:
             column_values = tuple(values.values())
             statement.replace(";", f" WHERE {criteria};")
 
-        if sort_column:
-            statement.replace(";", f" SORT BY {sort_column};")
+        if order_by:
+            statement.replace(";", f" SORT BY {order_by};")
 
         return self._execute(statement, column_values)
 
-    def update(self):
-        ...
+    def update(self, table_name, values, data):
+        self.delete(table_name, values)
+        self.add(table_name, data)
